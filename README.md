@@ -78,6 +78,25 @@ available.
   bounds?
 - How should a reaction's active strategies be made observable to participants?
 
+## Research workspace
+
+Current design work is organized across architecture notes, draft specifications and
+RFCs. Everything below is concept and research: no implementation exists.
+
+**Architecture**
+- [Execution model](docs/execution-model.md) - Revenue, Strategy, Execution, and the ignition boundary
+- [Control Room integration](docs/control-room-integration.md) - manual and automated administration over the same reserved budgets
+
+**Draft specifications**
+- [Strategy schema](specs/strategy.schema.json) - draft JSON Schema for a declared strategy
+- [Example: buyback strategy](specs/examples/buyback-strategy.json) - a strategy conforming to the draft schema
+
+**RFCs**
+- [RFC 0001 - Trigger model](rfcs/0001-trigger-model.md) - eligibility, conditions, cooldowns and manipulability
+
+**Open research**
+- [Safety invariants](research/safety-invariants.md) - candidate invariants an implementation would have to satisfy
+
 ## Links
 
 [Website](https://rearctor.io) · [Docs](https://rearctor.io/docs) · [GitHub](https://github.com/Rearctor) · [X](https://x.com/JoinRearctor) · [Telegram](https://t.me/rearctor)

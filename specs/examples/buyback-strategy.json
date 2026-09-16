@@ -1,0 +1,43 @@
+{
+  "strategy_id": "post-ignition-buyback",
+  "version": "0.1",
+  "enabled": true,
+  "activation_stage": "expansion",
+  "trigger": {
+    "kind": "accrued-threshold",
+    "denomination": "USDC",
+    "minimum_accrued": "500000000"
+  },
+  "action": {
+    "kind": "buyback",
+    "max_spend_per_execution": {
+      "denomination": "USDC",
+      "amount": "50000000"
+    },
+    "max_slippage_bps": 150
+  },
+  "budget_limit": {
+    "denomination": "USDC",
+    "amount": "250000000000"
+  },
+  "cooldown": {
+    "seconds": 21600
+  },
+  "conditions": [
+    {
+      "kind": "stage-is",
+      "stage": "expansion"
+    },
+    {
+      "kind": "minimum-remaining-budget",
+      "denomination": "USDC",
+      "amount": "50000000"
+    },
+    {
+      "kind": "minimum-pool-liquidity",
+      "denomination": "USDC",
+      "amount": "10000000000"
+    }
+  ],
+  "notes": "Illustrative strategy only. Buys back the reaction token from the migrated Uniswap V4 pool once 500 USDC has accrued, spending at most 50 USDC per execution, no more than once per six hours, capped at 250,000 USDC lifetime. Amounts are USDC base units (6 decimals). Slippage bound is illustrative and not a recommended value; no default slippage is proposed anywhere in this repository. Illustrative only. Not protocol defaults or committed parameters."
+}

@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Rearctor/autopilot/specs/strategy.schema.json",
+  "title": "Autopilot Strategy (draft)",
+  "description": "DRAFT. Describes a single declared automation strategy operating on a Rearctor reaction's reserved budgets. Field names, value domains and constraints are under research and are not final. This schema does not describe an implemented system.",
+  "type": "object",
+  "required": ["strategy_id", "version", "enabled", "trigger", "action", "budget_limit", "cooldown"],
+  "additionalProperties": false,
+  "properties": {
+    "strategy_id": {
+      "type": "string",
+      "description": "Stable identifier within the reaction's declared strategy set.",
+      "pattern": "^[a-z][a-z0-9-]{2,63}$"
+    },
+    "version": {
+      "type": "string",
+      "description": "Draft revision of the strategy format. Not a released version number.",
+      "pattern": "^0[.][0-9]+$"
+    },
+    "enabled": {
+      "type": "boolean",
+      "description": "Administrative pause. An operator must be able to set this false; see control-room-integration.md."
+    },
+    "activation_stage": {
+      "type": "string",
+      "description": "Earliest reaction stage at which this strategy may execute. Whether token-trading strategies may run pre-ignition is under research.",
+      "enum": ["charging", "expansion"],
+      "default": "expansion"
+    },
+    "trigger": {
+      "type": "object",
+      "description": "The condition that makes execution eligible. Answers 'is it time?'.",
+      "required": ["kind"],
+      "oneOf": [
+        {
+          "properties": {
+            "kind": { "const": "accrued-threshold" },
+            "denomination": { "type": "string", "enum": ["USDC", "REACTION_TOKEN"] },
+            "minimum_accrued": { "type": "string", "pattern": "^[0-9]+$" }
+          },
+          "required": ["kind", "denomination", "minimum_accrued"],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "kind": { "const": "volume-observed" },
+            "window_seconds": { "type": "integer", "minimum": 60, "maximum": 2592000 },
+            "minimum_volume": { "type": "string", "pattern": "^[0-9]+$" },
+            "denomination": { "type": "string", "enum": ["USDC"] }
+          },
+          "required": ["kind", "window_seconds", "minimum_volume", "denomination"],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "kind": { "const": "elapsed-interval" },
+            "interval_seconds": { "type": "integer", "minimum": 3600, "maximum": 31536000 }
+          },
+          "required": ["kind", "interval_seconds"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "action": {
+      "type": "object",
+      "description": "What is performed when the strategy fires. Closed set; arbitrary behaviour is a non-goal.",
+      "required": ["kind"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["buyback", "liquidity-reinvestment"]
+        },
+        "max_spend_per_execution": {
+          "type": "object",
+          "required": ["denomination", "amount"],
+          "additionalProperties": false,
+          "properties": {
+            "denomination": { "type": "string", "enum": ["USDC", "REACTION_TOKEN"] },
+            "amount": { "type": "string", "pattern": "^[0-9]+$" }
+          }
+        },
+        "max_slippage_bps": {
+          "type": "integer",
+          "description": "Upper bound on acceptable execution slippage. No default is proposed; an arbitrary default would be a silent protocol decision.",
+          "minimum": 1,
+          "maximum": 5000
+        }
+      }
+    },
+    "budget_limit": {
+      "type": "object",
+      "description": "Hard ceiling on cumulative spend across all executions of this strategy.",
+      "required": ["denomination", "amount"],
+      "additionalProperties": false,
+      "properties": {
+        "denomination": { "type": "string", "enum": ["USDC", "REACTION_TOKEN"] },
+        "amount": { "type": "string", "pattern": "^[0-9]+$" }
+      }
+    },
+    "cooldown": {
+      "type": "object",
+      "description": "Minimum interval between executions.",
+      "required": ["seconds"],
+      "additionalProperties": false,
+      "properties": {
+        "seconds": { "type": "integer", "minimum": 0, "maximum": 31536000 }
+      }
+    },
+    "conditions": {
+      "type": "array",
+      "description": "Additional predicates that must hold for execution to proceed. Answers 'is it safe?'. Empty array means no additional conditions.",
+      "items": {
+        "type": "object",
+        "required": ["kind"],
+        "additionalProperties": true,
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "minimum-pool-liquidity",
+              "maximum-price-deviation",
+              "minimum-remaining-budget",
+              "stage-is"
+            ]
+          }
+        }
+      },
+      "default": []
+    },
+    "notes": {
+      "type": "string",
+      "description": "Free-text rationale. Not interpreted.",
+      "maxLength": 2000
+    }
+  }
+}
